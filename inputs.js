@@ -230,11 +230,20 @@ function onMouseWheel(inputs, ev) {
     return false
 }
 
+var numMouseEvts = 3
 function onLockChange(inputs, ev) {
     var locked = document.pointerLockElement
         || document.mozPointerLockElement
         || null
     if (locked) inputs._ignoreMousemoveOnce = true
+    
+    if (!locked) {
+        for (var i = 1; i < numMouseEvts+1; ++i) {
+            var vkeycode = '<mouse ' + i + '>'
+            var keycode = -i
+            handleKeyEvent(keycode, vkeycode, false, inputs, {preventDefault: () => {}, stopPropagation: () => {}})
+        }        
+    }
 }
 
 
