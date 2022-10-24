@@ -208,13 +208,20 @@ function initEvents(inputs) {
 
     // pointer/mouse events
     var pointerOpts = { passive: true }
+
+
+    inputs.element.addEventListener("touchstart", onTouchStart.bind(undefined, inputs), pointerOpts)
+    inputs.element.addEventListener("touchend", onTouchEnd.bind(undefined, inputs), pointerOpts)
+    inputs.element.addEventListener("mousedown", onPointerEvent.bind(null, inputs, true), pointerOpts)
+    window.document.addEventListener("mouseup", onPointerEvent.bind(null, inputs, false), pointerOpts)
+
     if (window.PointerEvent) {
-        inputs.element.addEventListener("pointerdown", onPointerEvent.bind(null, inputs, true), pointerOpts)
-        window.document.addEventListener("pointerup", onPointerEvent.bind(null, inputs, false), pointerOpts)
+        // inputs.element.addEventListener("pointerdown", onPointerEvent.bind(null, inputs, true), pointerOpts)
+        // window.document.addEventListener("pointerup", onPointerEvent.bind(null, inputs, false), pointerOpts)
         inputs.element.addEventListener("pointermove", onPointerMove.bind(null, inputs), pointerOpts)
     } else {
-        inputs.element.addEventListener("mousedown", onPointerEvent.bind(null, inputs, true), pointerOpts)
-        window.document.addEventListener("mouseup", onPointerEvent.bind(null, inputs, false), pointerOpts)
+        // inputs.element.addEventListener("mousedown", onPointerEvent.bind(null, inputs, true), pointerOpts)
+        // window.document.addEventListener("mouseup", onPointerEvent.bind(null, inputs, false), pointerOpts)
         inputs.element.addEventListener("mousemove", onPointerMove.bind(null, inputs), pointerOpts)
     }
     inputs.element.addEventListener("wheel", onWheelEvent.bind(null, inputs), pointerOpts)
@@ -222,6 +229,43 @@ function initEvents(inputs) {
 
     // doc-level blur event for edge cases
     window.addEventListener("blur", onWindowBlur.bind(null, inputs), false)
+}
+
+
+// experimental - for touch events, extract useful dx/dy
+var lastTouchX = 0
+var lastTouchY = 0
+var lastTouchID = null
+function onTouchStart(inputs, ev) {
+    // Only start a new touch if there isn't one ongoing
+    if (lastTouchID === null) {
+        var touch = ev.changedTouches[0]
+        lastTouchX = touch.clientX
+        lastTouchY = touch.clientY
+        lastTouchID = touch.identifier
+    }
+}
+function onTouchEnd(inputs, ev) {
+    // For the touchend event, changedTouches is a list of the touch points that have been removed from the surface
+    var touches = ev.changedTouches
+    for (var i = 0; i < touches.length; ++i) {
+        if (touches[i].identifier === lastTouchID) {
+            lastTouchID = null
+        }
+    }
+}
+
+function getTouchMovement(ev) {
+    var touch
+    var touches = ev.changedTouches
+    for (var i = 0; i < touches.length; ++i) {
+        if (touches[i].identifier == lastTouchID) touch = touches[i]
+    }
+    if (!touch) return [0, 0]
+    var res = [touch.clientX - lastTouchX, touch.clientY - lastTouchY]
+    lastTouchX = touch.clientX
+    lastTouchY = touch.clientY
+    return res
 }
 
 
@@ -258,12 +302,19 @@ function onPointerEvent(inputs, nowDown, ev) {
 
 function onPointerMove(inputs, ev) {
     // if a touch exists, ignore movement of other touches
-    if ('pointerId' in ev && inputs._touches.currID !== null) {
-        if (inputs._touches.currID !== ev.pointerId) return
-    }
+    // if ('pointerId' in ev && inputs._touches.currID !== null) {
+        // if (inputs._touches.currID !== ev.pointerId) return
+    // }
     // fire no events, just expose the state data
     var dx = ev.movementX || ev.mozMovementX || 0,
         dy = ev.movementY || ev.mozMovementY || 0
+
+    if (ev.touches && (dx | dy) === 0) {
+        var xy = getTouchMovement(ev)
+        dx = xy[0]
+        dy = xy[1]
+    }
+
     inputs.pointerState.dx += dx
     inputs.pointerState.dy += dy
 }
