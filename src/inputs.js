@@ -210,19 +210,22 @@ function initEvents(inputs) {
     var pointerOpts = { passive: true }
 
 
-    inputs.element.addEventListener("touchstart", onTouchStart.bind(undefined, inputs), pointerOpts)
+    inputs.element.addEventListener("touchstart", onTouchStart.bind(undefined, inputs), {passive: false})
     inputs.element.addEventListener("touchend", onTouchEnd.bind(undefined, inputs), pointerOpts)
     inputs.element.addEventListener("mousedown", onPointerEvent.bind(null, inputs, true), pointerOpts)
     window.document.addEventListener("mouseup", onPointerEvent.bind(null, inputs, false), pointerOpts)
 
+    inputs.element.addEventListener("touchmove", onPointerMove.bind(null, inputs), pointerOpts)
+    inputs.element.addEventListener("mousemove", onPointerMove.bind(null, inputs), pointerOpts)
+
     if (window.PointerEvent) {
         // inputs.element.addEventListener("pointerdown", onPointerEvent.bind(null, inputs, true), pointerOpts)
         // window.document.addEventListener("pointerup", onPointerEvent.bind(null, inputs, false), pointerOpts)
-        inputs.element.addEventListener("pointermove", onPointerMove.bind(null, inputs), pointerOpts)
+        // inputs.element.addEventListener("pointermove", onPointerMove.bind(null, inputs), pointerOpts)
     } else {
         // inputs.element.addEventListener("mousedown", onPointerEvent.bind(null, inputs, true), pointerOpts)
         // window.document.addEventListener("mouseup", onPointerEvent.bind(null, inputs, false), pointerOpts)
-        inputs.element.addEventListener("mousemove", onPointerMove.bind(null, inputs), pointerOpts)
+        // inputs.element.addEventListener("mousemove", onPointerMove.bind(null, inputs), pointerOpts)
     }
     inputs.element.addEventListener("wheel", onWheelEvent.bind(null, inputs), pointerOpts)
     inputs.element.addEventListener("contextmenu", onContextMenu.bind(null, inputs), false)
@@ -237,6 +240,8 @@ var lastTouchX = 0
 var lastTouchY = 0
 var lastTouchID = null
 function onTouchStart(inputs, ev) {
+    ev.preventDefault() // Prevent vibration on long hold
+
     // Only start a new touch if there isn't one ongoing
     if (lastTouchID === null) {
         var touch = ev.changedTouches[0]
