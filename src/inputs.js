@@ -4,6 +4,7 @@ import { EventEmitter } from 'events'
 import packageJSON from '../package.json'
 var version = packageJSON.version
 
+console.log("Here")
 
 function DefaultOptions() {
     this.preventDefaults = false
@@ -238,39 +239,48 @@ function initEvents(inputs) {
 // experimental - for touch events, extract useful dx/dy
 var lastTouchX = 0
 var lastTouchY = 0
-var lastTouchID = null
+var currTouchId = null
 function onTouchStart(inputs, ev) {
     ev.preventDefault() // Prevent vibration on long hold
 
-    // Only start a new touch if there isn't one ongoing
-    if (lastTouchID === null) {
-        var touch = ev.changedTouches[0]
+    updateCurrTouch(ev)
+}
+function updateCurrTouch(ev) {
+    let touchIdExists = false
+    for (var i = 0; i < ev.touches.length; ++i) {
+        if (ev.touches[i].identifier === currTouchId) {
+            touchIdExists = true
+            break
+        }
+    }
+
+    if (!touchIdExists) {
+        const touch = ev.changedTouches[0]
         lastTouchX = touch.clientX
         lastTouchY = touch.clientY
-        lastTouchID = touch.identifier
+        currTouchId = touch.identifier
     }
 }
 function onTouchEnd(inputs, ev) {
-    // For the touchend event, changedTouches is a list of the touch points that have been removed from the surface
-    var touches = ev.changedTouches
-    for (var i = 0; i < touches.length; ++i) {
-        if (touches[i].identifier === lastTouchID) {
-            lastTouchID = null
-        }
-    }
+
 }
 
 function getTouchMovement(ev) {
-    var touch
-    var touches = ev.changedTouches
-    for (var i = 0; i < touches.length; ++i) {
-        if (touches[i].identifier == lastTouchID) touch = touches[i]
+    updateCurrTouch(ev)
+
+    let touch
+    for (var i = 0; i < ev.touches.length; ++i) {
+        if (ev.touches[i].identifier == currTouchId) {
+            touch = ev.touches[i]
+            const res = [touch.clientX - lastTouchX, touch.clientY - lastTouchY]
+            lastTouchX = touch.clientX
+            lastTouchY = touch.clientY
+            return res
+        }
     }
-    if (!touch) return [0, 0]
-    var res = [touch.clientX - lastTouchX, touch.clientY - lastTouchY]
-    lastTouchX = touch.clientX
-    lastTouchY = touch.clientY
-    return res
+
+    console.error(`Did not find touch id ${currTouchId}`)
+    return [0, 0]
 }
 
 
