@@ -247,7 +247,7 @@ function onTouchStart(inputs, ev) {
 }
 function updateCurrTouch(ev) {
     let touchIdExists = false
-    for (var i = 0; i < ev.touches.length; ++i) {
+    for (let i = 0; i < ev.touches.length; ++i) {
         if (ev.touches[i].identifier === currTouchId) {
             touchIdExists = true
             break
@@ -262,16 +262,21 @@ function updateCurrTouch(ev) {
     }
 }
 function onTouchEnd(inputs, ev) {
-
+    // For the touchend event, changedTouches is a list of the touch points that have been removed from the surface. Need to null out since chrome reuses identifiers once a touch ends.
+    var touches = ev.changedTouches
+    for (var i = 0; i < touches.length; ++i) {
+        if (touches[i].identifier === currTouchId) {
+            currTouchId = null
+        }
+    }
 }
 
 function getTouchMovement(ev) {
     updateCurrTouch(ev)
 
-    let touch
-    for (var i = 0; i < ev.touches.length; ++i) {
-        if (ev.touches[i].identifier == currTouchId) {
-            touch = ev.touches[i]
+    for (let i = 0; i < ev.changedTouches.length; ++i) {
+        if (ev.changedTouches[i].identifier == currTouchId) {
+            const touch = ev.changedTouches[i]
             const res = [touch.clientX - lastTouchX, touch.clientY - lastTouchY]
             lastTouchX = touch.clientX
             lastTouchY = touch.clientY
