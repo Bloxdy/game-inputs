@@ -4,8 +4,6 @@ import { EventEmitter } from 'events'
 import packageJSON from '../package.json'
 var version = packageJSON.version
 
-console.log("Here")
-
 function DefaultOptions() {
     this.preventDefaults = false
     this.stopPropagation = false
