@@ -9,6 +9,7 @@ function DefaultOptions() {
     this.stopPropagation = false
     this.allowContextMenu = false
     this.disabled = false
+    this.maxPointerMovement = 100
 }
 
 
@@ -79,7 +80,14 @@ export class GameInputs {
         }
 
         /** 
-         * How many times each binding has been **pressed** 
+         * If the mouse movement is over 4 times larger than the previous one,
+         * and the movement is larger than maxPointerMovement, we just ignore it.
+         * @type {number}
+         */
+        this.maxPointerMovement = opts.maxPointerMovement || 0
+
+        /**
+         * How many times each binding has been **pressed**
          * since the last time `tick` was called.
          * @type {{ [key:string]: number }} 
         */
@@ -333,12 +341,30 @@ function onPointerMove(inputs, ev) {
         dy = xy[1]
     }
 
-    inputs.pointerState.dx += dx
-    inputs.pointerState.dy += dy
+    // Apply movement filtering if enabled to detect browser bugs
+    if (inputs.maxPointerMovement > 0) {
+        var badx = Math.abs(dx) > inputs.maxPointerMovement && Math.abs(dx / lastx) > 4
+        var bady = Math.abs(dy) > inputs.maxPointerMovement && Math.abs(dy / lasty) > 4
+
+        if (badx || bady) {
+            // Ignore this movement as it's likely a browser bug
+            dx = 0
+            dy = 0
+
+            lastx = (lastx + dx) / 2
+            lasty = (lasty + dy) / 2
+        } else {
+            inputs.pointerState.dx += dx
+            inputs.pointerState.dy += dy
+
+            lastx = dx || 1
+            lasty = dy || 1
+        }
+    }
 }
 
-
-
+var lastx = 0
+var lasty = 0
 
 /*
  * 

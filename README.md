@@ -23,6 +23,7 @@ var domElement = document.querySelector('...')
 var inputs = new GameInputs(domElement, {
   preventDefaults: true, 
   allowContextMenu: false,
+  maxPointerMovement: 100, // optional - used to identify bad mouse movements caused by browser bugs
 })
 
 // bind an arbitrary event name to one or more physical key codes
@@ -86,6 +87,7 @@ Otherwise, please see the source ;)
 * When you specify a `domElement`, this module will only track **pointer** inputs (movement, clicks, and scrolls) inside that element. However **keyboard** inputs will be tracked globally at the document level.
 * If you don't specify a DOM element, `document` will be used.
 * For several reasons, this module doesn't call `preventDefault` or `stopPropagation` on mouse or scroll events, even if those properties are set. If you want to prevent parts of your page from scrolling or panning, it's more performant to do so via CSS.
+* The `maxPointerMovement` option prevents bad mouse movements caused by browser bugs. If the mouse movement is over 4 times larger than the previous one, and the movement is larger than maxPointerMovement, we just ignore it.
 
 
 
