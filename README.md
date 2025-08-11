@@ -23,7 +23,7 @@ var domElement = document.querySelector('...')
 var inputs = new GameInputs(domElement, {
   preventDefaults: true, 
   allowContextMenu: false,
-  maxPointerMovement: 100, // optional - used to identify bad mouse movements caused by browser bugs
+  maxPointerMovement: 150, // optional - used to identify bad mouse movements caused by browser bugs
 })
 
 // bind an arbitrary event name to one or more physical key codes

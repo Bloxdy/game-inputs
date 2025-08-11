@@ -9,7 +9,7 @@ function DefaultOptions() {
     this.stopPropagation = false
     this.allowContextMenu = false
     this.disabled = false
-    this.maxPointerMovement = 100
+    this.maxPointerMovement = 150
 }
 
 
@@ -343,16 +343,17 @@ function onPointerMove(inputs, ev) {
 
     // Apply movement filtering if enabled to detect browser bugs
     if (inputs.maxPointerMovement > 0) {
-        var badx = Math.abs(dx) > inputs.maxPointerMovement && Math.abs(dx / lastx) > 4
-        var bady = Math.abs(dy) > inputs.maxPointerMovement && Math.abs(dy / lasty) > 4
+        var xacc = Math.abs(dx - lastx)
+        var yacc = Math.abs(dy - lasty)
+        
+        var badx = xacc > inputs.maxPointerMovement && xacc / Math.abs(lastx || 1) > 12
+        var bady = yacc > inputs.maxPointerMovement && yacc / Math.abs(lasty || 1) > 12
 
-        if (badx || bady) {
+        var now = ev.timeStamp
+        var dt = now - (lastdate ?? now)
+
+        if (dt < 20 && (badx || bady)) {
             // Ignore this movement as it's likely a browser bug
-            dx = 0
-            dy = 0
-
-            lastx = (lastx + dx) / 2
-            lasty = (lasty + dy) / 2
         } else {
             inputs.pointerState.dx += dx
             inputs.pointerState.dy += dy
@@ -360,11 +361,14 @@ function onPointerMove(inputs, ev) {
             lastx = dx || 1
             lasty = dy || 1
         }
+
+        lastdate = now
     }
 }
 
 var lastx = 0
 var lasty = 0
+var lastdate = null
 
 /*
  * 
