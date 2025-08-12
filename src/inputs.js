@@ -342,7 +342,7 @@ function onPointerMove(inputs, ev) {
     }
 
     // Apply movement filtering if enabled to detect browser bugs
-    if (inputs.maxPointerMovement > 0) {
+    if ((dx !== 0 || dy !== 0) && inputs.maxPointerMovement > 0) {
         var xacc = Math.abs(dx - lastx)
         var yacc = Math.abs(dy - lasty)
         
