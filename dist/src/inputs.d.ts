@@ -56,13 +56,6 @@ export class GameInputs {
         scrollz: number;
     };
     /**
-     * Prevents bad mouse movements caused by browser bugs.
-     * If the mouse movement is over 4 times larger than the previous one,
-     * and the movement is larger than maxPointerMovement, we just ignore it.
-     * @type {number}
-     */
-    maxPointerMovement: number;
-    /** 
      * How many times each binding has been **pressed**
      * since the last time `tick` was called.
      * @type {{ [key:string]: number }}
@@ -124,6 +117,5 @@ declare class DefaultOptions {
     stopPropagation: boolean;
     allowContextMenu: boolean;
     disabled: boolean;
-    maxPointerMovement: number;
 }
 export {};
