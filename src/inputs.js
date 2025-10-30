@@ -1,8 +1,7 @@
 
 import { EventEmitter } from 'events'
 
-import packageJSON from '../package.json'
-var version = packageJSON.version
+var version = '0.7.0' // Hardcode version to avoid JSON import issues with Node 20 + webpack
 
 function DefaultOptions() {
     this.preventDefaults = false
